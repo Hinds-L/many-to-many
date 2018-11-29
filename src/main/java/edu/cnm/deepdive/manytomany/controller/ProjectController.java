@@ -66,6 +66,11 @@ public class ProjectController {
     studentRepository.saveAll(students);
     projectRepository.delete(project);
   }
+  @GetMapping("{projectId}/students")
+  public List<Student> studentList (@PathVariable("projectId") long projectId) {
+    return get(projectId).getStudents();
+  }
+
 
   @PostMapping(value = "{projectId}/students", consumes = MediaType.APPLICATION_JSON_VALUE,
   produces = MediaType.APPLICATION_JSON_VALUE)
@@ -82,4 +87,17 @@ public class ProjectController {
   @ExceptionHandler(NoSuchElementException.class)
   public void notFound() {
   }
-}
+
+  @DeleteMapping(value = "{projectId}/students/{studentId}")
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  public void deleteStudent(@PathVariable("projectId") long projectId,
+      @PathVariable("studentId") long studentId) {
+    Project project = get(projectId);
+    Student student = studentRepository.findById(studentId).get();
+    if (project.getStudents().remove(student)) {
+      projectRepository.save(project);
+    } else {
+      throw new NoSuchElementException();
+    }
+  }
+  }
